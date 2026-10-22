@@ -1,0 +1,33 @@
+### Testes rápidos (extensão REST Client do VS Code ou HTTP Client do Rider)
+### Local: @base = http://localhost:7071/api  (rodando com `func start`, a chave não é exigida)
+### Azure: @base = https://<sua-function-app>.azurewebsites.net/api  e preencha @key
+
+@base = http://localhost:7071/api
+@key =
+
+### Hello
+GET {{base}}/hello?name=Heitor
+
+### Health
+GET {{base}}/health
+
+### Criar tarefa
+POST {{base}}/todos?code={{key}}
+Content-Type: application/json
+
+{
+  "title": "Estudar Azure Functions",
+  "order": 1
+}
+
+### Validação (deve retornar 400)
+POST {{base}}/todos?code={{key}}
+Content-Type: application/json
+
+{ "order": 2 }
+
+### Listar tarefas
+GET {{base}}/todos?code={{key}}
+
+### Buscar por id (cole o id retornado no POST)
+GET {{base}}/todos/00000000-0000-0000-0000-000000000000?code={{key}}

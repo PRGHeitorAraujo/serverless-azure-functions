@@ -1,0 +1,19 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+
+    "StorageConnection": "UseDevelopmentStorage=true",
+    "TimerSchedule": "0 */5 * * * *",
+
+    "SqlConnectionString": "Server=localhost,1433;Database=ServerlessDb;User Id=sa;Password=Your_strong_Passw0rd;TrustServerCertificate=True;",
+    "ToDoBaseUrl": "http://localhost:7071/api/todos",
+
+    "ServiceBusConnection": "<connection string do namespace do Service Bus>",
+    "ServiceBusQueueName": "orders",
+    "WebhookUrl": "https://webhook.site/<seu-id>",
+
+    "AzureWebJobs.ForwardQueueMessage.Disabled": "true"
+  }
+}

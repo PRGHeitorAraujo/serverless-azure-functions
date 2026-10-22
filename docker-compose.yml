@@ -1,0 +1,36 @@
+# Ambiente local: Azurite (emulador do Storage) + SQL Server.
+# Uso: docker compose up -d
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.33.0
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --skipApiVersionCheck
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Your_strong_Passw0rd"
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 10
+
+  # Cria o banco e a tabela assim que o SQL Server estiver de pé.
+  sql-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - ./sql:/sql:ro
+    entrypoint: >
+      /bin/bash -c "
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'Your_strong_Passw0rd' -C -Q 'IF DB_ID(''ServerlessDb'') IS NULL CREATE DATABASE ServerlessDb' &&
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'Your_strong_Passw0rd' -C -d ServerlessDb -i /sql/schema.sql"
+    restart: "no"

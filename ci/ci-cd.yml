@@ -1,0 +1,56 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Publicar na Function App?"
+        type: boolean
+        default: false
+
+env:
+  DOTNET_VERSION: "8.0.x"
+  PROJECT_PATH: src/FunctionApp/FunctionApp.csproj
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build
+        run: dotnet build ${{ env.PROJECT_PATH }} -c Release
+
+      - name: Publish
+        run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -o ./publish
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: functionapp
+          path: ./publish
+
+  deploy:
+    # Só roda quando disparado manualmente com deploy=true.
+    # Pré-requisitos: secret AZURE_FUNCTIONAPP_PUBLISH_PROFILE e variável AZURE_FUNCTIONAPP_NAME no repositório.
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: functionapp
+          path: ./publish
+
+      - uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
+          package: ./publish
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          sku: flexconsumption

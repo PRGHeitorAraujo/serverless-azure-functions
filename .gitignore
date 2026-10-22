@@ -1,0 +1,25 @@
+# .NET / Azure Functions
+bin/
+obj/
+publish/
+*.user
+.vs/
+.vscode/*
+!.vscode/extensions.json
+
+# Segredos locais — NUNCA versionar
+local.settings.json
+appsettings.*.local.json
+*.publishsettings
+
+# Azurite
+__azurite_db_*.json
+__blobstorage__/
+__queuestorage__/
+
+# Bicep build output
+infra/*.json
+
+# SO
+.DS_Store
+Thumbs.db
